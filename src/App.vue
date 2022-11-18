@@ -11,6 +11,9 @@
         <div>
           show users
         </div>
+        <div>
+          adfadf
+        </div>
       </template>
       <template #body="{option}">
         <div
@@ -36,14 +39,23 @@
         <div>
           {{ option.username }}
         </div>
+        <option-dell
+          :option="option"
+        />
       </template>
     </base-filter>
+    <option-dell
+      v-for="option in selectedOptions"
+      :key="option.id"
+      :option="option"
+    />
   </div>
 </template>
 
 <script setup>
-  import {computed, onMounted, ref} from 'vue';
+  import {onMounted, ref} from 'vue';
   import BaseFilter from './components/BaseFilter.vue';
+  import OptionDell from './components/OptionDell.vue';
 
   const products = ref([]);
   const users = ref([]);
@@ -52,19 +64,9 @@
   const getProducts = async () => (await (await fetch('https://dummyjson.com/products')).json()).products;
   const getUsers = async () => (await (await fetch('https://dummyjson.com/users')).json()).users;
 
-  // const deleteSelectedOption = (id) => {
-  //   const index = selectedOptions.value.findIndex((option) => option.id === id);
-  //   if (index !== -1) {
-  //     selectedOptions.value.splice(index, 1);
-  //   }
-  // };
-
-
   onMounted(async () => {
     products.value = await getProducts();
     users.value = await getUsers();
-    console.log(users.value);
-    console.log(products.value);
   });
 </script>
 
@@ -72,6 +74,9 @@
   .app {
     margin: 0 auto;
     max-width: 1360px;
+    &__multiselect{
+      width: 300px;
+    }
   }
   .user{
     width: 100%;

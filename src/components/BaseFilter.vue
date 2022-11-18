@@ -7,14 +7,20 @@
       class="multiselect__toggler"
       @click="isShown = !isShown"
     >
-      <slot name="head">
-        <button>
-          I'll show you: {{ props.optionLabelProp ? props.optionLabelProp : 'options' }}
-          {{ isShown ? `&#708;` : `&#709;` }}
-        </button>
-      </slot>
       <div>
-        {{ isShown ? `&#708;` : `&#709;` }}
+        <slot
+          name="head"
+          class="sss"
+        >
+          <button>
+            I'll show you: {{ props.optionLabelProp ? props.optionLabelProp : 'options' }}
+            {{ isShown ? `&#708;` : `&#709;` }}
+          </button>
+        </slot>
+      </div>
+
+      <div>
+        {{ isShown ? `&and;` : `&or;` }}
       </div>
     </div>
     <div
@@ -99,21 +105,29 @@
 
   const model = computed({
     get() {
-      console.log(props.modelValue);
       return props.modelValue;
     },
     set(value) {
-      console.log(value);
       emit('update:modelValue', value);
     },
   });
-  const checkSelectedOption = (value) => {
-    if (!model.value.includes(value)) {
-      model.value.push(value);
-    } else {
-      model.value.splice(model.value.indexOf(value), 1);
-    }
 
+  const filteredOptions = computed(() => {
+    if (filter.value) {
+      return props.options.filter((option) => option[props.optionLabelProp].toLowerCase().includes(filter.value.toLowerCase()));
+    }
+    return props.options;
+  });
+
+  const checkSelectedOption = (value) => {
+    if (model.value.includes(value)) {
+      const newModelValue = [...props.modelValue];
+      newModelValue.splice(newModelValue.indexOf(value), 1);
+      model.value = newModelValue;
+    } else {
+      model.value = [...props.modelValue, value];
+    }
+    //
     // if (props.modelValue.includes(value)) {
     //   const newModelValue = [...props.modelValue];
     //   newModelValue.splice(newModelValue.indexOf(value), 1);
@@ -124,75 +138,23 @@
   };
 
 
-  const filteredOptions = computed(() => {
-    if (filter.value) {
-      return props.options.filter((option) => option[props.optionLabelProp].toLowerCase().includes(filter.value.toLowerCase()));
-    }
-    return props.options;
-  });
-
-  //------------------------------------------------------------------------------------------------------
   const resetFilter = () => {
     filter.value = '';
     isShown.value = false;
   };
 
   const {
-    clickOutside,
-    destroyListener,
-    addClickOutside,
-    removeListeners,
+    createClickOutsideListener,
+    destroyClickOutsideListener,
   } = useClickOutside();
-  console.log(filterField);
 
-  onMounted(() => {
-    clickOutside('aaa', filterField.value, resetFilter);
+  watch(isShown, (newStateIshow) => {
+    if (newStateIshow) {
+      createClickOutsideListener('clickOutside', filterField.value, resetFilter);
+    } else {
+      destroyClickOutsideListener('clickOutside');
+    }
   });
-
-  removeListeners();
-  // watch(isShown, (newValue) => {
-  //   if (!newValue) {
-  //     destroyListener('aaa');
-  //   } else {
-  //   }
-  // });
-
-
-  // const {createListener, destroyListener} = useClickOutside();
-  //
-  // watch(isShown, (newValue) => {
-  //   if (!newValue) {
-  //     destroyListener(filterField.value, resetFilter, 'clickListener');
-  //   }
-  // });
-
-
-
-
-  // watch(isShown, (newValue, oldValue) => {
-  //   console.log(newValue, oldValue);
-  //   if (newValue) {
-  //     const {createListener} = useClickOutside(isShown.value, filterField.value, resetFilter);
-  //     createListener(document);
-  //   } else {
-  //     console.log('destr');
-  //     const {destroyListener} = useClickOutside();
-  //     destroyListener(document);
-  //   }
-  // });
-
-  //
-  // const refreshFilter = (e) => {
-  //   e.preventDefault();
-  //   if (isShown.value) {
-  //     if (!filterField.value.contains(e.target)) {
-  //       filter.value = '';
-  //     }
-  //   }
-  // };
-
-  // addListener(document);
-  // removeListener(document);
 </script>
 
 <style lang="scss" scoped>
@@ -200,26 +162,29 @@
     display: grid;
     justify-content: center;
     justify-items: center;
-    width: 300px;
+    width: 100%;
     padding: 10px 0;
     position: relative;
 
     &__toggler {
       display: grid;
-      grid-template-columns: 1fr 10px;
-      width: 100%;
+      grid-template-columns: 90% 10%;
+      min-width: 300px;
       cursor: pointer;
       border: solid 1px grey;
       border-radius: 2px;
       padding: 5px;
       opacity: 0.8;
     }
+    &__selected{
+      min-width: 100%;
+    }
   }
 
   .selected {
     padding: 5px 0;
-    width: 300px;
     display: grid;
+    min-width: 100%;
     grid-template-columns: 1fr 1fr 1fr;
 
     &__item {
@@ -256,6 +221,9 @@
       width: 100%;
       height: 30px;
       font-size: 20px;
+    }
+    .sss{
+      background-color: coral;
     }
   }
 </style>
