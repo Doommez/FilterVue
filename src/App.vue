@@ -2,20 +2,17 @@
   <div class="app">
     <base-filter
       v-model="selectedOptions"
-      class="app__multiselect"
+      class="app__base-filter"
       :options="users"
       :option-label-prop="`username`"
       :selected-options="selectedOptions"
     >
-      <template #head>
-        <div>
+      <template #toggler>
+        <div class="header-filter">
           show users
         </div>
-        <div>
-          adfadf
-        </div>
       </template>
-      <template #body="{option}">
+      <template #filter-option="{option}">
         <div
           class="user"
           :class="{selected: selectedOptions.includes(option)}"
@@ -35,37 +32,25 @@
           </span>
         </div>
       </template>
-      <template #cheked="{option}">
+      <template #selected-option="{option}">
         <div>
           {{ option.username }}
         </div>
-        <option-dell
-          :option="option"
-        />
       </template>
     </base-filter>
-    <option-dell
-      v-for="option in selectedOptions"
-      :key="option.id"
-      :option="option"
-    />
   </div>
 </template>
 
 <script setup>
   import {onMounted, ref} from 'vue';
   import BaseFilter from './components/BaseFilter.vue';
-  import OptionDell from './components/OptionDell.vue';
 
-  const products = ref([]);
   const users = ref([]);
   const selectedOptions = ref([]);
 
-  const getProducts = async () => (await (await fetch('https://dummyjson.com/products')).json()).products;
   const getUsers = async () => (await (await fetch('https://dummyjson.com/users')).json()).users;
 
   onMounted(async () => {
-    products.value = await getProducts();
     users.value = await getUsers();
   });
 </script>
@@ -74,20 +59,27 @@
   .app {
     margin: 0 auto;
     max-width: 1360px;
-    &__multiselect{
+
+    &__base-filter {
       width: 300px;
     }
   }
-  .user{
+
+  .user {
     width: 100%;
     display: grid;
     grid-template-columns: 10px 1fr 1fr;
-    &__img{
+
+    &__img {
       max-height: 20px;
     }
   }
-  .selected{
-    background-color: coral;
+
+  .selected {
+    background-color: #9d7aee;
   }
 
+  .header-filter {
+    width: 282px;
+  }
 </style>

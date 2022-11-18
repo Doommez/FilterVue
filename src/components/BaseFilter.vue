@@ -1,75 +1,71 @@
 <template>
-  <div
-    ref="filterField"
-    class="multiselect"
-  >
+  <div>
     <div
-      class="multiselect__toggler"
-      @click="isShown = !isShown"
+      ref="filterField"
+      class="multiselect"
     >
-      <div>
-        <slot
-          name="head"
-          class="sss"
-        >
-          <button>
-            I'll show you: {{ props.optionLabelProp ? props.optionLabelProp : 'options' }}
-            {{ isShown ? `&#708;` : `&#709;` }}
-          </button>
-        </slot>
-      </div>
+      <div
+        class="multiselect__toggler"
+        @click="isShown = !isShown"
+      >
+        <div>
+          <slot name="toggler">
+            <button>
+              I'll show you: {{ props.optionLabelProp ? props.optionLabelProp : 'options' }}
+            </button>
+          </slot>
+        </div>
 
-      <div>
-        {{ isShown ? `&and;` : `&or;` }}
+        <div>
+          {{ isShown ? `&#5169;` : `&#5167;` }}
+        </div>
+      </div>
+      <div
+        v-if="isShown"
+        class="multiselect__filter filter"
+      >
+        <input
+          v-model="filter"
+          type="text"
+          placeholder="filter"
+          class="filter__input"
+        >
+        <div
+          v-if="!filteredOptions.length"
+          class="filter__error"
+        >
+          I didn't find anything
+        </div>
+        <div
+          v-for="option in filteredOptions"
+          :key="option.id"
+          class="filter__item"
+          @click="checkIfOptionSelected(option)"
+        >
+          <slot
+            name="filter-option"
+            :option="option"
+          >
+            <div>default value</div>
+          </slot>
+        </div>
       </div>
     </div>
-    <div
-      class="multiselect__selected selected"
-    >
+    <div class="selected">
       <div
         v-for="option in modelValue"
         :key="option.id"
         class="selected__item"
       >
         <slot
-          name="cheked"
+          name="selected-option"
           :option="option"
         >
-          defalt value https://robohash.org/hicveldicta.png
+          default value
         </slot>
-        <button @click="checkSelectedOption(option)">
+        <button @click="checkIfOptionSelected(option)">
           X
         </button>
-      </div>
-    </div>
-    <div
-      v-show="isShown"
-      class="multiselect__filter filter"
-    >
-      <input
-        v-model="filter"
-        type="text"
-        placeholder="filter"
-        class="filter__input"
-      >
-      <div
-        v-if="!filteredOptions.length"
-        class="filter__error"
-      >
-        I didn't find anything
-      </div>
-      <div
-        v-for="option in filteredOptions"
-        :key="option.id"
-        class="filter__item"
-        @click="checkSelectedOption(option)"
-      >
-        <slot
-          name="body"
-          :option="option"
-        >
-          <div>default value</div>
-        </slot>
       </div>
     </div>
   </div>
@@ -77,7 +73,7 @@
 
 <script setup>
   import {
-    ref, computed, watch, onMounted,
+    ref, computed, watch,
   } from 'vue';
   import {useClickOutside} from '../composables/useClickOutside.js';
 
@@ -119,7 +115,7 @@
     return props.options;
   });
 
-  const checkSelectedOption = (value) => {
+  const checkIfOptionSelected = (value) => {
     if (model.value.includes(value)) {
       const newModelValue = [...props.modelValue];
       newModelValue.splice(newModelValue.indexOf(value), 1);
@@ -127,16 +123,7 @@
     } else {
       model.value = [...props.modelValue, value];
     }
-    //
-    // if (props.modelValue.includes(value)) {
-    //   const newModelValue = [...props.modelValue];
-    //   newModelValue.splice(newModelValue.indexOf(value), 1);
-    //   emit('update:modelValue', newModelValue);
-    // } else {
-    //   emit('update:modelValue', [...props.modelValue, value]);
-    // }
   };
-
 
   const resetFilter = () => {
     filter.value = '';
@@ -161,23 +148,27 @@
   .multiselect {
     display: grid;
     justify-content: center;
-    justify-items: center;
     width: 100%;
-    padding: 10px 0;
     position: relative;
 
     &__toggler {
       display: grid;
       grid-template-columns: 90% 10%;
-      min-width: 300px;
+      align-items: center;
+      width: 100%;
       cursor: pointer;
       border: solid 1px grey;
       border-radius: 2px;
       padding: 5px;
       opacity: 0.8;
     }
-    &__selected{
-      min-width: 100%;
+
+    &__filter {
+      width: 100%;
+      max-height: 200px;
+      padding: 10px;
+      z-index: 100;
+
     }
   }
 
@@ -188,17 +179,22 @@
     grid-template-columns: 1fr 1fr 1fr;
 
     &__item {
-      border: solid tomato 1px;
-      border-radius: 4px;
-      padding: 4px;
+      border: solid #9d7aee 1px;
+      border-radius: 50%;
+      padding: 10px;
       display: grid;
       grid-template-columns: 50px 20px;
       justify-content: space-between;
       margin: 5px;
+      overflow: hidden;
 
       button {
         grid-column: 2/3;
         cursor: pointer;
+        border-radius: 50%;
+        opacity: 0.7;
+        border: none;
+
       }
     }
   }
@@ -206,24 +202,23 @@
   .filter {
     display: grid;
     width: 100%;
-    max-height: 300px;
-    overflow: scroll;
+    overflow-y: scroll;
     position: absolute;
-    top: 42px;
-    background-color: aliceblue;
+    top: 120%;
+    background-color: white;
 
     &__item {
       width: 100%;
-      justify-self: center;
+      padding: 5px 0;
     }
 
     &__input {
-      width: 100%;
+      position: sticky;
+      top: -5%;
+      max-width: inherit;
       height: 30px;
       font-size: 20px;
-    }
-    .sss{
-      background-color: coral;
+      padding-left: 10px;
     }
   }
 </style>
