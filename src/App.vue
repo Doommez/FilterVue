@@ -8,7 +8,7 @@
       :selected-options="selectedOptions"
     >
       <template #toggler>
-        <div class="header-filter">
+        <div class="toggler">
           show users
         </div>
       </template>
@@ -79,7 +79,7 @@
     background-color: #9d7aee;
   }
 
-  .header-filter {
+  .toggler {
     width: 282px;
   }
 </style>
