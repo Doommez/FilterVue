@@ -135,8 +135,8 @@
     destroyClickOutsideListener,
   } = useClickOutside();
 
-  watch(isShown, (newStateIshow) => {
-    if (newStateIshow) {
+  watch(isShown, (newStateIshown) => {
+    if (newStateIshown) {
       createClickOutsideListener('clickOutside', filterField.value, resetFilter);
     } else {
       destroyClickOutsideListener('clickOutside');
