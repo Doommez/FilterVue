@@ -20,7 +20,7 @@ export const useClickOutside = () => {
     }
   };
 
-  const createClickOutsideListener = (key, node, callback) => {
+  const createClickOutsideListener = ({key, node, callback}) => {
     const listenerIndex = getListenerIndex(key);
     if (listenerIndex || getListenerIndex(key) !== 0) {
       const listener = {

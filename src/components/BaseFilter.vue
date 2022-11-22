@@ -1,38 +1,46 @@
 <template>
   <div>
     <div
-      ref="filterField"
+      ref="nodeFilter"
       class="multiselect"
     >
       <div
-        class="multiselect__toggler"
-        @click="isShown = !isShown"
+        class="multiselect__toggle"
+        @click="toggleMultiselect"
       >
-        <div>
-          <slot name="toggler">
-            <button>
-              I'll show you: {{ props.optionLabelProp ? props.optionLabelProp : 'options' }}
-            </button>
-          </slot>
-        </div>
-
-        <div>
-          {{ isShown ? `&#5169;` : `&#5167;` }}
-        </div>
+        <slot
+          name="toggle"
+          :is-shown="isShown"
+        >
+          <button>
+            I'll show you: {{ props.optionLabelProp ? props.optionLabelProp : 'options' }}
+          </button>
+        </slot>
+      </div>
+      <div class="multiselect__selected selected">
+        <slot
+          v-for="option in modelValue"
+          :key="option.id"
+          name="selected-option"
+          :option="option"
+          :remove="checkIfOptionSelected"
+        >
+          {{ optionLabelProp }}
+        </slot>
       </div>
       <div
         v-if="isShown"
         class="multiselect__filter filter"
       >
         <input
-          v-model="filter"
+          v-model="searchFilter"
           type="text"
           placeholder="filter"
           class="filter__input"
         >
         <div
           v-if="!filteredOptions.length"
-          class="filter__error"
+          class="filter__empty"
         >
           I didn't find anything
         </div>
@@ -46,26 +54,9 @@
             name="filter-option"
             :option="option"
           >
-            <div>default value</div>
+            <div>{{ optionLabelProp }}</div>
           </slot>
         </div>
-      </div>
-    </div>
-    <div class="selected">
-      <div
-        v-for="option in modelValue"
-        :key="option.id"
-        class="selected__item"
-      >
-        <slot
-          name="selected-option"
-          :option="option"
-        >
-          default value
-        </slot>
-        <button @click="checkIfOptionSelected(option)">
-          X
-        </button>
       </div>
     </div>
   </div>
@@ -76,6 +67,11 @@
     ref, computed, watch,
   } from 'vue';
   import {useClickOutside} from '../composables/useClickOutside.js';
+
+  const {
+    createClickOutsideListener,
+    destroyClickOutsideListener,
+  } = useClickOutside();
 
   const emit = defineEmits([
     'update:modelValue',
@@ -88,32 +84,34 @@
     },
     optionLabelProp: {
       type: String,
-      required: true,
+      default: 'Item',
     },
     modelValue: {
       type: Array,
       required: true,
     },
   });
-  const filter = ref(null);
+  const searchFilter = ref(null);
   const isShown = ref(null);
-  const filterField = ref(null);
+  const nodeFilter = ref(null);
 
   const model = computed({
-    get() {
-      return props.modelValue;
-    },
+    get: () => props.modelValue,
     set(value) {
       emit('update:modelValue', value);
     },
   });
 
   const filteredOptions = computed(() => {
-    if (filter.value) {
-      return props.options.filter((option) => option[props.optionLabelProp].toLowerCase().includes(filter.value.toLowerCase()));
+    if (searchFilter.value) {
+      return props.options.filter((option) => option[props.optionLabelProp].toLowerCase().includes(searchFilter.value.toLowerCase()));
     }
     return props.options;
   });
+
+  const toggleMultiselect = () => {
+    isShown.value = !isShown.value;
+  };
 
   const checkIfOptionSelected = (value) => {
     if (model.value.includes(value)) {
@@ -126,18 +124,17 @@
   };
 
   const resetFilter = () => {
-    filter.value = '';
+    searchFilter.value = '';
     isShown.value = false;
   };
 
-  const {
-    createClickOutsideListener,
-    destroyClickOutsideListener,
-  } = useClickOutside();
-
-  watch(isShown, (newStateIshown) => {
-    if (newStateIshown) {
-      createClickOutsideListener('clickOutside', filterField.value, resetFilter);
+  watch(isShown, (newStateIsShown) => {
+    if (newStateIsShown) {
+      createClickOutsideListener({
+        key: 'clickOutside',
+        node: nodeFilter.value,
+        callback: resetFilter,
+      });
     } else {
       destroyClickOutsideListener('clickOutside');
     }
@@ -152,9 +149,6 @@
     position: relative;
 
     &__toggler {
-      display: grid;
-      grid-template-columns: 90% 10%;
-      align-items: center;
       width: 100%;
       cursor: pointer;
       border: solid 1px grey;
@@ -168,34 +162,12 @@
       max-height: 200px;
       padding: 10px;
       z-index: 100;
-
     }
-  }
 
-  .selected {
-    padding: 5px 0;
-    display: grid;
-    min-width: 100%;
-    grid-template-columns: 1fr 1fr 1fr;
-
-    &__item {
-      border: solid #9d7aee 1px;
-      border-radius: 50%;
-      padding: 10px;
+    &__selected {
+      padding: 5px 0;
       display: grid;
-      grid-template-columns: 50px 20px;
-      justify-content: space-between;
-      margin: 5px;
-      overflow: hidden;
-
-      button {
-        grid-column: 2/3;
-        cursor: pointer;
-        border-radius: 50%;
-        opacity: 0.7;
-        border: none;
-
-      }
+      min-width: 100%;
     }
   }
 
@@ -203,9 +175,9 @@
     display: grid;
     width: 100%;
     overflow-y: scroll;
-    position: absolute;
-    top: 120%;
     background-color: white;
+    position: absolute;
+    top: 40px;
 
     &__item {
       width: 100%;
@@ -219,6 +191,10 @@
       height: 30px;
       font-size: 20px;
       padding-left: 10px;
+    }
+
+    &__empty {
+      color: red;
     }
   }
 </style>

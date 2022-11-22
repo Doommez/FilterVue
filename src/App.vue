@@ -7,15 +7,18 @@
       :option-label-prop="`username`"
       :selected-options="selectedOptions"
     >
-      <template #toggler>
-        <div class="toggler">
+      <template #toggle="{isShown}">
+        <div class="toggle">
           show users
+          <div>
+            {{ isShown ? `&#5169;` : `&#5167;` }}
+          </div>
         </div>
       </template>
       <template #filter-option="{option}">
         <div
           class="user"
-          :class="{selected: selectedOptions.includes(option)}"
+          :class="{select: selectedOptions.includes(option)}"
         >
           <input
             id="option.id"
@@ -32,9 +35,12 @@
           </span>
         </div>
       </template>
-      <template #selected-option="{option}">
-        <div>
+      <template #selected-option="{option, remove}">
+        <div class="selected__option">
           {{ option.username }}
+          <button @click="remove(option)">
+            X
+          </button>
         </div>
       </template>
     </base-filter>
@@ -65,6 +71,17 @@
     }
   }
 
+  .toggle {
+    width: 282px;
+    display: grid;
+    grid-template-columns: 90% 10%;
+    cursor: pointer;
+    border: solid 1px grey;
+    border-radius: 2px;
+    padding: 5px;
+    opacity: 0.8;
+  }
+
   .user {
     width: 100%;
     display: grid;
@@ -75,11 +92,28 @@
     }
   }
 
-  .selected {
+  .select {
     background-color: #9d7aee;
   }
 
-  .toggler {
-    width: 282px;
+  .selected__option {
+    border: solid #9d7aee 1px;
+    border-radius: 10px;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 50px 20px;
+    justify-content: space-between;
+    margin: 5px;
+    overflow: hidden;
+
+    button {
+      grid-column: 2/3;
+      cursor: pointer;
+      border-radius: 50%;
+      opacity: 0.7;
+      border: none;
+    }
   }
+
+
 </style>
