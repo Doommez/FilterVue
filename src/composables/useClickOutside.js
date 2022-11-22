@@ -40,7 +40,6 @@ export const useClickOutside = () => {
   };
 
 
-
   onBeforeUnmount(() => {
     listeners.forEach((listener) => {
       destroyClickOutsideListener(listener.key);

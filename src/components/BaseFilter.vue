@@ -66,7 +66,7 @@
   import {
     ref, computed, watch,
   } from 'vue';
-  import {useClickOutside} from '../composables/useClickOutside.js';
+  import {useClickOutside} from '../composables/useClickOutside';
 
   const {
     createClickOutsideListener,
@@ -91,6 +91,7 @@
       required: true,
     },
   });
+
   const searchFilter = ref(null);
   const isShown = ref(null);
   const nodeFilter = ref(null);
